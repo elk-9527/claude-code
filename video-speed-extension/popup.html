@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 280px;
+      padding: 16px;
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #1e1e2e;
+      color: #cdd6f4;
+    }
+    h2 {
+      font-size: 15px;
+      text-align: center;
+      margin-bottom: 14px;
+      color: #f5c2e7;
+    }
+    .speed-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .current-speed {
+      flex: 1;
+      text-align: center;
+      font-size: 36px;
+      font-weight: bold;
+      color: #a6e3a1;
+    }
+    .speed-unit { font-size: 16px; color: #6c7086; }
+    .preset-btns {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    button {
+      border: none;
+      border-radius: 6px;
+      padding: 8px 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.15s;
+      background: #313244;
+      color: #cdd6f4;
+    }
+    button:hover { background: #45475a; }
+    button.active { background: #a6e3a1; color: #1e1e2e; }
+    .reset-btn {
+      width: 100%;
+      background: #f38ba8;
+      color: #1e1e2e;
+      font-size: 14px;
+      padding: 10px;
+      margin-top: 4px;
+    }
+    .reset-btn:hover { background: #f06292; }
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: #45475a;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #a6e3a1;
+      cursor: pointer;
+    }
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #6c7086;
+      margin-top: -8px;
+      margin-bottom: 4px;
+    }
+    .range-labels span { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>⚡ 视频加速器</h2>
+  <div class="speed-row">
+    <span style="font-size:28px; user-select:none;">🎬</span>
+    <span class="current-speed" id="speedDisplay">1.0</span>
+    <span class="speed-unit">x</span>
+  </div>
+  <div class="slider-container">
+    <span style="font-size:12px;color:#6c7086;">0.25</span>
+    <input type="range" id="speedSlider" min="0.25" max="32" step="0.05" value="1">
+    <span style="font-size:12px;color:#6c7086;">32</span>
+  </div>
+  <div class="range-labels">
+    <span data-speed="0.5">0.5</span>
+    <span data-speed="1">1</span>
+    <span data-speed="2">2</span>
+    <span data-speed="4">4</span>
+    <span data-speed="8">8</span>
+    <span data-speed="16">16</span>
+    <span data-speed="32">32</span>
+  </div>
+  <div class="preset-btns" id="presetBtns">
+    <button data-speed="0.5">0.5x</button>
+    <button data-speed="1">1x</button>
+    <button data-speed="1.5">1.5x</button>
+    <button data-speed="2">2x</button>
+    <button data-speed="3">3x</button>
+    <button data-speed="4">4x</button>
+    <button data-speed="8">8x</button>
+    <button data-speed="16">16x</button>
+  </div>
+  <button class="reset-btn" id="resetBtn">🔄 重置为 1x</button>
+  <script src="popup.js"></script>
+</body>
+</html>

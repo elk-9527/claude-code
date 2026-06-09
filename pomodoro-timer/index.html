@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>番茄钟 - Pomodoro Timer</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --work: #ef4444;
+    --work-glow: rgba(239, 68, 68, 0.3);
+    --break: #22c55e;
+    --break-glow: rgba(34, 197, 94, 0.3);
+    --long-break: #3b82f6;
+    --long-break-glow: rgba(59, 130, 246, 0.3);
+    --ring-bg: #334155;
+    --btn-bg: #334155;
+    --btn-hover: #475569;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .container {
+    text-align: center;
+    padding: 48px 32px;
+    max-width: 480px;
+    width: 100%;
+  }
+
+  /* ── Header ── */
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 36px;
+  }
+
+  /* ── Mode Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 5px;
+    margin-bottom: 36px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .tab.active {
+    background: var(--btn-bg);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* ── Timer Ring ── */
+  .timer-wrapper {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 0 auto 36px;
+  }
+  .ring-bg {
+    fill: none;
+    stroke: var(--ring-bg);
+    stroke-width: 8;
+  }
+  .ring-progress {
+    fill: none;
+    stroke: var(--work);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transition: stroke-dashoffset 1s linear, stroke 0.4s;
+  }
+  .ring-progress.break { stroke: var(--break); }
+  .ring-progress.long-break { stroke: var(--long-break); }
+
+  .timer-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .time {
+    font-size: 4.2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+  .status {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  /* ── Controls ── */
+  .controls {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin-bottom: 36px;
+  }
+  .btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: var(--btn-bg);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn:hover { background: var(--btn-hover); transform: scale(1.05); }
+  .btn:active { transform: scale(0.95); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  .btn.primary {
+    width: 64px;
+    height: 64px;
+    background: var(--work);
+    box-shadow: 0 0 24px var(--work-glow);
+  }
+  .btn.primary:hover { background: #f87171; }
+  .btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── Session counter ── */
+  .sessions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 28px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .dot-row { display: flex; gap: 5px; }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ring-bg);
+    transition: background 0.3s;
+  }
+  .dot.done { background: var(--work); box-shadow: 0 0 6px var(--work-glow); }
+
+  /* ── Settings ── */
+  .settings {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+  }
+  .setting {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+  }
+  .setting label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .setting input {
+    width: 56px;
+    padding: 6px;
+    border: 1px solid var(--btn-bg);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    text-align: center;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .setting input:focus {
+    outline: none;
+    border-color: var(--work);
+  }
+  .setting input::-webkit-inner-spin-button { opacity: 1; }
+
+  /* ── Notification permission ── */
+  .notify-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 20px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    background: none;
+    border: none;
+    font-family: inherit;
+  }
+  .notify-hint:hover { opacity: 1; }
+
+  /* ── Responsive ── */
+  @media (max-width: 420px) {
+    .container { padding: 32px 20px; }
+    .timer-wrapper { width: 240px; height: 240px; }
+    .time { font-size: 3.4rem; }
+    .settings { gap: 10px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🍅 番茄钟</h1>
+  <p class="subtitle">专注工作 · 高效休息</p>
+
+  <!-- Mode Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-mode="work">🍅 专注</button>
+    <button class="tab" data-mode="break">☕ 短休息</button>
+    <button class="tab" data-mode="longBreak">🌿 长休息</button>
+  </div>
+
+  <!-- Timer -->
+  <div class="timer-wrapper">
+    <svg width="280" height="280" viewBox="0 0 280 280">
+      <circle class="ring-bg" cx="140" cy="140" r="124" />
+      <circle class="ring-progress" id="ring" cx="140" cy="140" r="124"
+              stroke-dasharray="779.1" stroke-dashoffset="0" />
+    </svg>
+    <div class="timer-text">
+      <div class="time" id="timeDisplay">25:00</div>
+      <div class="status" id="statusText">准备开始</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn" id="btnReset" title="重置" disabled>
+      <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+    </button>
+    <button class="btn primary" id="btnToggle" title="开始">
+      <svg id="iconPlay" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+      <svg id="iconPause" viewBox="0 0 24 24" style="display:none"><rect x="4" y="3" width="6" height="18" rx="1"/><rect x="14" y="3" width="6" height="18" rx="1"/></svg>
+    </button>
+    <button class="btn" id="btnSkip" title="跳过">
+      <svg viewBox="0 0 24 24"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>
+    </button>
+  </div>
+
+  <!-- Session Dots -->
+  <div class="sessions">
+    <span>今日完成</span>
+    <div class="dot-row" id="dotRow"></div>
+    <span id="sessionCount">0</span>
+  </div>
+
+  <!-- Settings -->
+  <div class="settings">
+    <div class="setting">
+      <label>专注 (分)</label>
+      <input type="number" id="workTime" value="25" min="1" max="120">
+    </div>
+    <div class="setting">
+      <label>短休 (分)</label>
+      <input type="number" id="breakTime" value="5" min="1" max="60">
+    </div>
+    <div class="setting">
+      <label>长休 (分)</label>
+      <input type="number" id="longBreakTime" value="15" min="1" max="60">
+    </div>
+    <div class="setting">
+      <label>回合数</label>
+      <input type="number" id="roundsBeforeLong" value="4" min="1" max="10">
+    </div>
+  </div>
+
+  <button class="notify-hint" id="notifyHint">🔔 开启桌面通知</button>
+</div>
+
+<script>
+  /* ── State ── */
+  const CIRCUMFERENCE = 2 * Math.PI * 124; // ~779.1
+
+  const modes = {
+    work:       { key: 'work',     label: '专注中', nextLabel: '时间到！休息一下吧 ☕' },
+    break:      { key: 'break',    label: '休息中', nextLabel: '休息结束，继续加油 🍅' },
+    longBreak:  { key: 'longBreak',label: '长休息', nextLabel: '长休息结束，新的一轮！💪' },
+  };
+
+  let currentMode   = 'work';
+  let timeLeft      = 25 * 60;       // seconds
+  let totalTime     = 25 * 60;
+  let timerInterval = null;
+  let isRunning     = false;
+  let sessionCount  = 0;
+  let completedInRound = 0;          // work sessions done in current round
+
+  /* ── DOM refs ── */
+  const $time    = document.getElementById('timeDisplay');
+  const $status  = document.getElementById('statusText');
+  const $ring    = document.getElementById('ring');
+  const $toggle  = document.getElementById('btnToggle');
+  const $reset   = document.getElementById('btnReset');
+  const $skip    = document.getElementById('btnSkip');
+  const $play    = document.getElementById('iconPlay');
+  const $pause   = document.getElementById('iconPause');
+  const $dots    = document.getElementById('dotRow');
+  const $count   = document.getElementById('sessionCount');
+  const $notify  = document.getElementById('notifyHint');
+  const $workIn  = document.getElementById('workTime');
+  const $breakIn = document.getElementById('breakTime');
+  const $longIn  = document.getElementById('longBreakTime');
+  const $roundsIn = document.getElementById('roundsBeforeLong');
+  const $tabs    = document.querySelectorAll('.tab');
+
+  /* ── Init ── */
+  function init() {
+    loadSettings();
+    switchMode('work', /* userInitiated */ false);
+    renderDots();
+    updateDisplay();
+  }
+
+  /* ── Timer helpers ── */
+  function fmt(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  function updateDisplay() {
+    $time.textContent = fmt(timeLeft);
+    const fraction = 1 - (timeLeft / totalTime);
+    $ring.style.strokeDashoffset = (CIRCUMFERENCE * (1 - fraction)).toFixed(2);
+  }
+
+  function setRingColor() {
+    $ring.classList.remove('break', 'long-break');
+    if (currentMode === 'break') $ring.classList.add('break');
+    if (currentMode === 'longBreak') $ring.classList.add('long-break');
+  }
+
+  /* ── Timer logic ── */
+  function tick() {
+    if (timeLeft <= 0) {
+      finish();
+      return;
+    }
+    timeLeft--;
+    updateDisplay();
+  }
+
+  function start() {
+    if (isRunning) return;
+    isRunning = true;
+    $play.style.display = 'none';
+    $pause.style.display = '';
+    $status.textContent = modes[currentMode].label;
+    $reset.disabled = false;
+    timerInterval = setInterval(tick, 1000);
+  }
+
+  function pause() {
+    if (!isRunning) return;
+    isRunning = false;
+    $play.style.display = '';
+    $pause.style.display = 'none';
+    $status.textContent = '已暂停';
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  function reset() {
+    pause();
+    const mins = getMinutesForMode(currentMode);
+    timeLeft = mins * 60;
+    totalTime = mins * 60;
+    $status.textContent = '准备开始';
+    updateDisplay();
+  }
+
+  function skip() {
+    pause();
+    finish();
+  }
+
+  function finish() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    isRunning = false;
+    $play.style.display = '';
+    $pause.style.display = 'none';
+
+    // Play sound
+    playChime();
+
+    // Notify
+    notify(modes[currentMode].nextLabel);
+
+    // Update sessions
+    if (currentMode === 'work') {
+      sessionCount++;
+      completedInRound++;
+      $count.textContent = sessionCount;
+      renderDots();
+      saveTodaySessions();
+
+      const rounds = parseInt($roundsIn.value) || 4;
+      if (completedInRound >= rounds) {
+        completedInRound = 0;
+        switchMode('longBreak', false);
+      } else {
+        switchMode('break', false);
+      }
+    } else {
+      // break / longBreak finished
+      if (currentMode === 'longBreak') {
+        completedInRound = 0;
+      }
+      switchMode('work', false);
+    }
+
+    // Update total time for the new mode
+    timeLeft = getMinutesForMode(currentMode) * 60;
+    totalTime = timeLeft;
+    updateDisplay();
+    $status.textContent = '准备开始';
+
+    // Auto-start after 1.5s
+    clearTimeout(window._autoStart);
+    window._autoStart = setTimeout(() => {
+      if (!isRunning) start();
+    }, 1500);
+  }
+
+  /* ── Mode switching ── */
+  function switchMode(mode, userInitiated = true) {
+    if (userInitiated) {
+      pause();
+      if (mode === 'work') {
+        // don't reset completedInRound
+      } else if (mode === 'longBreak') {
+        completedInRound = 0;
+      }
+    }
+
+    currentMode = mode;
+    const mins = getMinutesForMode(mode);
+    timeLeft = mins * 60;
+    totalTime = mins * 60;
+
+    setRingColor();
+    updateDisplay();
+    $status.textContent = '准备开始';
+
+    // Update tabs
+    $tabs.forEach(t => {
+      t.classList.toggle('active', t.dataset.mode === mode);
+    });
+
+    // Update button color
+    const btn = document.getElementById('btnToggle');
+    btn.classList.remove('primary'); // always keep it styled, just change shadow
+    const glowVar = mode === 'work' ? '--work-glow'
+                  : mode === 'break' ? '--break-glow'
+                  : '--long-break-glow';
+    const colorVar = mode === 'work' ? '--work'
+                   : mode === 'break' ? '--break'
+                   : '--long-break';
+    btn.style.background = `var(${colorVar})`;
+    btn.style.boxShadow = `0 0 24px var(${glowVar})`;
+
+    // Save
+    saveSettings();
+  }
+
+  function getMinutesForMode(mode) {
+    if (mode === 'work')      return parseInt($workIn.value) || 25;
+    if (mode === 'break')     return parseInt($breakIn.value) || 5;
+    if (mode === 'longBreak') return parseInt($longIn.value) || 15;
+    return 25;
+  }
+
+  /* ── Session dots ── */
+  function renderDots() {
+    const rounds = parseInt($roundsIn.value) || 4;
+    let html = '';
+    for (let i = 0; i < rounds; i++) {
+      html += `<div class="dot${i < completedInRound ? ' done' : ''}"></div>`;
+    }
+    $dots.innerHTML = html;
+  }
+
+  /* ── Sound ── */
+  function playChime() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const notes = [523.25, 659.25, 783.99]; // C5 E5 G5
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + i * 0.15);
+        osc.stop(ctx.currentTime + i * 0.15 + 0.5);
+      });
+    } catch(e) { /* audio not available */ }
+  }
+
+  /* ── Notifications ── */
+  function notify(msg) {
+    if (Notification.permission === 'granted') {
+      new Notification('🍅 番茄钟', { body: msg, icon: '🍅', silent: true });
+    }
+  }
+
+  async function requestNotification() {
+    if (Notification.permission === 'granted') {
+      $notify.textContent = '✅ 桌面通知已开启';
+      return;
+    }
+    if (Notification.permission === 'denied') {
+      $notify.textContent = '🚫 通知已被拒绝，请在浏览器设置中开启';
+      return;
+    }
+    const result = await Notification.requestPermission();
+    if (result === 'granted') {
+      $notify.textContent = '✅ 桌面通知已开启';
+    } else {
+      $notify.textContent = '⚠️ 通知未开启，点击重试';
+    }
+  }
+
+  /* ── Persistence ── */
+  function saveSettings() {
+    const s = {
+      work: $workIn.value,
+      break: $breakIn.value,
+      longBreak: $longIn.value,
+      rounds: $roundsIn.value,
+      mode: currentMode,
+    };
+    localStorage.setItem('pomodoro_settings', JSON.stringify(s));
+  }
+
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem('pomodoro_settings');
+      if (!raw) return;
+      const s = JSON.parse(raw);
+      if (s.work) $workIn.value = s.work;
+      if (s.break) $breakIn.value = s.break;
+      if (s.longBreak) $longIn.value = s.longBreak;
+      if (s.rounds) $roundsIn.value = s.rounds;
+      if (s.mode && modes[s.mode]) currentMode = s.mode;
+    } catch(e) { /* ignore */ }
+  }
+
+  function saveTodaySessions() {
+    const today = new Date().toISOString().slice(0, 10);
+    const key = `pomodoro_${today}`;
+    const val = parseInt(localStorage.getItem(key) || '0') + 1;
+    localStorage.setItem(key, val);
+    // Also keep a total
+    const total = parseInt(localStorage.getItem('pomodoro_total') || '0') + 1;
+    localStorage.setItem('pomodoro_total', total);
+  }
+
+  // Load today's count
+  function loadTodayCount() {
+    const today = new Date().toISOString().slice(0, 10);
+    const key = `pomodoro_${today}`;
+    sessionCount = parseInt(localStorage.getItem(key) || '0');
+    $count.textContent = sessionCount;
+  }
+
+  /* ── Events ── */
+  $toggle.addEventListener('click', () => {
+    if (isRunning) pause();
+    else start();
+  });
+
+  $reset.addEventListener('click', reset);
+  $skip.addEventListener('click', skip);
+
+  $tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      switchMode(tab.dataset.mode, true);
+    });
+  });
+
+  $notify.addEventListener('click', requestNotification);
+
+  // Settings changes
+  [$workIn, $breakIn, $longIn, $roundsIn].forEach(el => {
+    el.addEventListener('change', () => {
+      saveSettings();
+      if (!isRunning) {
+        const mins = getMinutesForMode(currentMode);
+        timeLeft = mins * 60;
+        totalTime = mins * 60;
+        updateDisplay();
+      }
+      renderDots();
+      setRingColor();
+    });
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return; // ignore when typing in inputs
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (isRunning) pause(); else start();
+    }
+    if (e.code === 'KeyR' && !e.ctrlKey && !e.metaKey) {
+      reset();
+    }
+    if (e.code === 'KeyS' && !e.ctrlKey && !e.metaKey) {
+      skip();
+    }
+  });
+
+  // Wake lock to prevent screen dimming during focus sessions
+  let wakeLock = null;
+  async function requestWakeLock() {
+    try {
+      if ('wakeLock' in navigator && isRunning && currentMode === 'work') {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+      }
+    } catch(e) { /* not supported or denied */ }
+  }
+  async function releaseWakeLock() {
+    if (wakeLock) {
+      await wakeLock.release();
+      wakeLock = null;
+    }
+  }
+  // Hook into start/pause
+  const origStart = start;
+  start = function() {
+    origStart();
+    if (currentMode === 'work') requestWakeLock();
+  };
+  const origPause = pause;
+  pause = function() {
+    origPause();
+    releaseWakeLock();
+  };
+
+  /* ── Bootstrap ── */
+  loadTodayCount();
+  init();
+</script>
+
+</body>
+</html>

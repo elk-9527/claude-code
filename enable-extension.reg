@@ -1,0 +1,19 @@
+Windows Registry Editor Version 5.00
+
+; ============================================================
+; Edge 强制安装「视频速度控制」扩展 (绕过旁加载禁用)
+; 扩展ID: pjolccjfadpgdbdciobablcfnbbpppjf
+; 双击导入后，完全重启 Edge 即可生效
+; ============================================================
+
+; 1) 强制安装列表：让 Edge 主动安装并启用该扩展，开关无法被关闭
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge\ExtensionInstallForcelist]
+"1"="pjolccjfadpgdbdciobablcfnbbpppjf;file:///C:/Users/Lenovo/Desktop/claude%20code/update.xml"
+
+; 2) 允许名单：明确放行该扩展 ID
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge\ExtensionInstallAllowlist]
+"1"="pjolccjfadpgdbdciobablcfnbbpppjf"
+
+; 3) 允许本地 file:// 路径作为扩展来源
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge\ExtensionInstallSources]
+"1"="file:///*"
