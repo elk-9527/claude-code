@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="28dp"
+    android:gravity="center_horizontal"
+    android:background="@color/bg">
+
+    <!-- Logo -->
+    <LinearLayout
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="48dp"
+        android:background="@drawable/logo_bg"
+        android:gravity="center">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⇆"
+            android:textSize="36sp"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="跨屏协同"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="通过 USB 数据线连接 PC"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary" />
+
+    <!-- 状态卡 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:background="@drawable/card_bg"
+        android:padding="18dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/statusDot"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/dot_grey" />
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:text="等待 USB 连接…"
+            android:textSize="15sp"
+            android:textColor="@color/text_primary" />
+    </LinearLayout>
+
+    <!-- 权限卡 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/card_bg"
+        android:padding="18dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="所需权限"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:textAllCaps="true"
+            android:letterSpacing="0.08" />
+
+        <!-- 无障碍 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/accessibilityHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚠ 请开启无障碍服务"
+                android:textSize="13sp"
+                android:textColor="@color/warn"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/btnAccessibility"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="开启无障碍服务"
+                android:textSize="15sp"
+                android:background="@drawable/btn_primary"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <!-- 悬浮窗 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/overlayHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚠ 请授予悬浮窗权限"
+                android:textSize="13sp"
+                android:textColor="@color/warn"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/btnOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="授予悬浮窗权限"
+                android:textSize="15sp"
+                android:background="@drawable/btn_secondary"
+                android:textColor="@color/text_primary" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 使用说明 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="使用方法：打开 PC 端软件 → 插上 USB 数据线（平板开启 USB 调试）→ PC 端选择设备点击「连接」→ 鼠标移到屏幕最右边缘即可穿越控制平板"
+        android:textSize="12.5sp"
+        android:textColor="@color/text_secondary"
+        android:lineSpacingMultiplier="1.5"
+        android:background="@drawable/tip_bg"
+        android:padding="14dp" />
+
+</LinearLayout>

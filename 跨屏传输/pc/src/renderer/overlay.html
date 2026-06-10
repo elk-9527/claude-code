@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>穿越</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      cursor: none;
+      background: rgba(10, 132, 255, 0.04);
+      font-family: -apple-system, "PingFang SC", sans-serif;
+    }
+    /* 顶部提示条 */
+    #banner {
+      position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.78); color: white;
+      padding: 9px 18px; border-radius: 999px; font-size: 13px;
+      backdrop-filter: blur(20px); pointer-events: none;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+      display: flex; align-items: center; gap: 8px;
+    }
+    #banner .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #34c759; box-shadow: 0 0 6px #34c759; }
+    /* 本地虚拟光标(镜像) */
+    #ghost {
+      position: fixed; width: 22px; height: 22px; pointer-events: none;
+      left: 0; top: 0; transform: translate(-2px, -2px);
+      transition: opacity 0.2s;
+    }
+    #ghost svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+    /* 左边缘回退提示 */
+    #edge {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 6px;
+      background: linear-gradient(90deg, rgba(10,132,255,0.5), transparent);
+      pointer-events: none; opacity: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="banner"><span class="live-dot"></span>控制平板中 · 鼠标移到<b>&nbsp;左边缘&nbsp;</b>或按 Esc 退回</div>
+  <div id="edge"></div>
+  <svg id="ghost" viewBox="0 0 24 24" width="22" height="22">
+    <path d="M5 3l14 7-6 1.5L10 18z" fill="white" stroke="#0a84ff" stroke-width="1.5"/>
+  </svg>
+  <script src="overlay.js"></script>
+</body>
+</html>

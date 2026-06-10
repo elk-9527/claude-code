@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(adb kill-server *)",
+      "Bash(adb start-server *)",
+      "Bash(powershell.exe -NoProfile -Command 'Get-PnpDevice -PresentOnly | Where-Object { $_.Class -in '\\\\''USB'\\\\'','\\\\''AndroidUsbDeviceClass'\\\\'','\\\\''Ports'\\\\'','\\\\''Portable Devices'\\\\'' -or $_.FriendlyName -match '\\\\''Android|ADB|Tablet|平板|MTP|Composite'\\\\'' } | Select-Object Status,Class,FriendlyName | Format-Table -AutoSize')"
+    ]
+  }
+}

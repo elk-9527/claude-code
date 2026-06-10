@@ -1,0 +1,2 @@
+# Claude settings (may contain tokens/device IDs)
+.claude/settings.local.json
